@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jsplugins>
+  <!--
+    安装说明：
+    1. 将本文件复制到：
+       Windows: %APPDATA%\kingsoft\wps\jsaddons\publish.xml
+       Linux:   ~/.local/share/Kingsoft/wps/jsaddons/publish.xml
+    2. 将 ../addon 目录整体复制并重命名为 WpsExcelAI_1.0.0，放到同一 jsaddons 目录下
+       （目录名可保持 1.0.0；功能版本见 UI / README 的 1.2.3）
+    3. 重启 WPS 表格
+    若已有 publish.xml，只需追加下面这一行 jsplugin，不要覆盖其它加载项。
+  -->
+  <jsplugin name="WpsExcelAI" type="et" version="1.2.3" url="file://" enable="enable_dev" />
+</jsplugins>

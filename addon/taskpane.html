@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI 助手</title>
+  <link rel="stylesheet" href="css/taskpane.css" />
+</head>
+<body>
+  <header class="app-header">
+    <h1>AI 助手</h1>
+    <div class="header-actions">
+      <button type="button" class="btn btn-primary" id="btnOpenWorkspace" title="打开对话+逐格同意工作区">打开 AI 工作区</button>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button type="button" class="tab active" data-tab="chat" id="tabChat">对话</button>
+    <button type="button" class="tab" data-tab="history" id="tabHistory">历史</button>
+    <button type="button" class="tab" data-tab="settings" id="tabSettings">设置</button>
+  </nav>
+
+  <div id="status" class="status" style="margin: 8px 12px 0;" role="status"></div>
+
+  <main class="main">
+    <!-- 对话页：轻对话；写入走 AI 工作区 -->
+    <section id="pageChat">
+      <div class="sel-status" id="ctxStatus" title="发送时会自动附带当前选区">选区：读取中…</div>
+
+      <div class="panel panel-compact">
+        <div class="chip-row" id="chipRow">
+          <button type="button" class="chip" data-chip="formula_gen">公式生成</button>
+          <button type="button" class="chip" data-chip="formula_explain">公式解释</button>
+          <button type="button" class="chip" data-chip="clean">数据清洗</button>
+          <button type="button" class="chip" data-chip="pivot">分类汇总</button>
+          <button type="button" class="chip" data-chip="filter_hl">筛选高亮</button>
+          <button type="button" class="chip" data-chip="table">整理成表</button>
+          <button type="button" class="chip" data-chip="fill_blank">补全空值</button>
+          <button type="button" class="chip" data-chip="fake">生成假数据</button>
+          <button type="button" class="chip chip-muted" data-chip="clear_hl" title="清除选区填充色">清除高亮</button>
+        </div>
+        <div class="hint" id="chipHint" style="margin-top:6px;">点芯片预填提示词；高亮类尽量本地执行。</div>
+      </div>
+
+      <div class="panel panel-chat">
+        <div class="panel-title">
+          <span>对话</span>
+          <button type="button" class="btn btn-ghost" id="btnNewChat" style="padding:2px 6px;">新会话</button>
+        </div>
+        <div class="chat-history" id="chatHistory"></div>
+        <div class="field" style="margin-top:8px;">
+          <label for="userInput">用中文提问</label>
+          <textarea id="userInput" placeholder="例如：根据选区生成汇总表；解释这列公式…"></textarea>
+        </div>
+        <div class="row row-send">
+          <button type="button" class="btn btn-primary" id="btnSend">发送</button>
+        </div>
+        <p class="workspace-tip" id="workspaceTip">
+          审查写入请 <button type="button" class="link-btn" id="btnOpenWorkspaceTip">打开 AI 工作区</button>（逐格同意）
+        </p>
+      </div>
+    </section>
+
+    <!-- 历史页 -->
+    <section id="pageHistory" class="hidden">
+      <div class="panel">
+        <div class="panel-title">
+          <span>本地会话列表</span>
+          <button type="button" class="btn btn-ghost" id="btnRefreshHistory" style="padding:2px 6px;">刷新</button>
+        </div>
+        <div id="historyList" class="history-list"></div>
+        <p class="hint" style="margin-top:8px;">保存在本机 PluginStorage / localStorage，不会上传。可导出 Markdown 或 JSON。</p>
+      </div>
+    </section>
+
+    <!-- 设置页 -->
+    <section id="pageSettings" class="hidden">
+      <div class="panel">
+        <div class="panel-title">API 设置（OpenAI 兼容）</div>
+        <div class="field">
+          <label for="apiBaseUrl">API Base URL</label>
+          <input type="text" id="apiBaseUrl" placeholder="https://api.deepseek.com/v1" />
+          <div class="hint">DeepSeek：Base URL 填 <code>https://api.deepseek.com/v1</code>，模型填 <code>deepseek-chat</code>。</div>
+        </div>
+        <div class="field">
+          <label for="apiKey">API Key</label>
+          <input type="password" id="apiKey" placeholder="sk-..." autocomplete="off" />
+        </div>
+        <div class="field">
+          <label for="apiModel">模型名称</label>
+          <input type="text" id="apiModel" placeholder="gpt-4o-mini / deepseek-chat" />
+        </div>
+        <div class="field">
+          <label class="checkbox-row">
+            <input type="checkbox" id="useProxy" checked />
+            使用本地代理（解决 CORS，推荐）
+          </label>
+        </div>
+
+        <details class="advanced" id="settingsAdvanced">
+          <summary>高级</summary>
+          <div class="field" style="margin-top:10px;">
+            <label for="proxyUrl">本地代理地址</label>
+            <input type="text" id="proxyUrl" placeholder="http://127.0.0.1:8787" />
+            <div class="hint">默认 http://127.0.0.1:8787。Mac 由 LaunchAgent 自启。</div>
+          </div>
+          <div class="field">
+            <label for="historyTurns">多轮上下文（最近 N 轮，默认 8）</label>
+            <input type="number" id="historyTurns" min="1" max="30" step="1" value="8" />
+          </div>
+          <div class="field">
+            <label class="checkbox-row">
+              <input type="checkbox" id="useStream" checked />
+              流式输出（边生成边显示）
+            </label>
+          </div>
+        </details>
+
+        <div class="row" style="margin-top:12px;">
+          <button type="button" class="btn btn-primary" id="btnSaveSettings">保存设置</button>
+          <button type="button" class="btn" id="btnTestConn">测试连接</button>
+          <button type="button" class="btn" id="btnResetSettings">恢复默认</button>
+        </div>
+        <div id="testConnResult" class="test-result hidden"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">说明</div>
+        <div style="font-size:12px;color:#646a73;">
+          <p style="margin:0 0 6px;">侧栏用于轻对话；写入请打开「AI 工作区」逐格同意后再改表。</p>
+          <p style="margin:0;">API Key 仅保存在本机，不会打进分发包。</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="footer-note">WpsExcelAI v1.2.2 · 写入请用 AI 工作区</div>
+
+  <script src="js/utils.js"></script>
+  <script src="js/excel.js"></script>
+  <script src="js/ai.js"></script>
+  <script src="js/history.js"></script>
+  <script src="js/taskpane.js"></script>
+</body>
+</html>

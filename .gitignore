@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+proxy/node_modules/
+
+# Logs / OS
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Local secrets (never commit real keys)
+.env
+.env.local
+*.pem
+
+# Build / temp
+dist/
+wps-addon-build/
+tmp/
+temp/
+*.tmp
+
+# WPS auto-generated (if present after debug)
+addon/index.html
+
+__pycache__/
+*.pyc
+
+# Local runtime logs
+logs/

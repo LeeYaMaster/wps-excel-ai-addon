@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<customUI xmlns="http://schemas.microsoft.com/office/2006/01/customui" onLoad="OnAddinLoad">
+  <ribbon startFromScratch="false">
+    <tabs>
+      <tab id="WpsExcelAITab" label="AI 助手" insertBeforeMso="TabHome">
+        <group id="WpsExcelAIGroup" label="对话">
+          <button id="WpsExcelAIOpenWorkspace" label="打开 AI 工作区" size="large" onAction="OnOpenAiWorkspace" getImage="GetImage"/>
+          <button id="WpsExcelAIOpenPane" label="打开 AI 面板" size="normal" onAction="OnOpenTaskPane" getImage="GetImage"/>
+          <button id="WpsExcelAIRefreshPane" label="刷新面板" size="normal" onAction="OnRefreshTaskPane" getImage="GetImage"/>
+          <button id="WpsExcelAIAbout" label="关于" size="normal" onAction="OnAbout" getImage="GetImage"/>
+        </group>
+      </tab>
+    </tabs>
+  </ribbon>
+</customUI>

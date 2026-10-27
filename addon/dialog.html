@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI 工作区</title>
+  <link rel="stylesheet" href="css/dialog.css" />
+</head>
+<body>
+  <header class="dlg-header">
+    <div class="dlg-title">
+      <h1>AI 工作区</h1>
+      <span class="dlg-badge">v1.2.2 · 逐格同意</span>
+    </div>
+    <div class="dlg-header-actions">
+      <button type="button" class="btn btn-ghost" id="btnRefreshCtx" title="刷新选区">刷新上下文</button>
+      <button type="button" class="btn btn-ghost" id="btnOpenSettings" title="API 设置">设置</button>
+    </div>
+  </header>
+
+  <div id="status" class="status" role="status"></div>
+
+  <div class="dlg-body">
+    <!-- 左：对话 -->
+    <section class="pane-chat" aria-label="对话">
+      <div class="ctx-bar">
+        <span id="ctxMeta" class="ctx-meta">选区未读取</span>
+        <span id="ctxBrief" class="ctx-brief"></span>
+      </div>
+
+      <div class="chip-row" id="chipRow">
+        <button type="button" class="chip" data-chip="formula_gen">公式生成</button>
+        <button type="button" class="chip" data-chip="clean">数据清洗</button>
+        <button type="button" class="chip" data-chip="pivot">分类汇总</button>
+        <button type="button" class="chip" data-chip="table">整理成表</button>
+        <button type="button" class="chip" data-chip="fill_blank">补全空值</button>
+        <button type="button" class="chip" data-chip="fake">假数据</button>
+      </div>
+
+      <div class="chat-history" id="chatHistory"></div>
+
+      <div class="composer">
+        <textarea id="userInput" rows="3" placeholder="用中文描述要对表格做什么…（⌘/Ctrl+Enter 发送）"></textarea>
+        <div class="composer-row">
+          <label class="checkbox-row">
+            <input type="checkbox" id="chkIncludeCtx" checked />
+            附带选区
+          </label>
+          <button type="button" class="btn btn-ghost" id="btnNewChat">新会话</button>
+          <button type="button" class="btn btn-primary" id="btnSend">发送</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 右：变更列表（Cursor 式 diff） -->
+    <section class="pane-diff" aria-label="单元格变更">
+      <div class="diff-toolbar">
+        <div class="diff-toolbar-title">
+          <strong>单元格变更</strong>
+          <span id="diffSummary" class="muted">等待 AI 生成表格…</span>
+        </div>
+        <div class="diff-toolbar-actions">
+          <label class="field-inline">
+            写入目标
+            <select id="writeMode">
+              <option value="selected">选区（可扩展）</option>
+              <option value="active">活动单元格起</option>
+              <option value="replace">仅替换选中</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="diff-bulk">
+        <button type="button" class="btn btn-ok" id="btnSelectChanges">全选变更</button>
+        <button type="button" class="btn" id="btnSelectAll">全选</button>
+        <button type="button" class="btn" id="btnSelectNone">全拒</button>
+        <button type="button" class="btn btn-ghost" id="btnHideSame" data-on="1">隐藏不变</button>
+        <button type="button" class="btn btn-primary" id="btnApplySelected">应用已选</button>
+      </div>
+
+      <div class="diff-list-wrap">
+        <table class="diff-table" id="diffTable">
+          <thead>
+            <tr>
+              <th class="col-check"><input type="checkbox" id="chkHeader" title="切换可见行" /></th>
+              <th class="col-addr">地址</th>
+              <th class="col-kind">类型</th>
+              <th class="col-from">旧值</th>
+              <th class="col-arrow"></th>
+              <th class="col-to">新值</th>
+            </tr>
+          </thead>
+          <tbody id="diffBody">
+            <tr class="empty-row"><td colspan="6">尚无变更。发送问题后，解析出的表格会与当前表对比并列在此处。</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="diff-footer">
+        <span id="selCount" class="muted">已选 0 格</span>
+        <button type="button" class="btn btn-ghost" id="btnRebuildDiff">按当前选区重算 diff</button>
+      </div>
+    </section>
+  </div>
+
+  <!-- 简易设置浮层 -->
+  <div id="settingsOverlay" class="overlay hidden" aria-hidden="true">
+    <div class="overlay-card">
+      <div class="overlay-head">
+        <strong>API 设置</strong>
+        <button type="button" class="btn btn-ghost" id="btnCloseSettings">关闭</button>
+      </div>
+      <div class="field">
+        <label for="apiBaseUrl">API Base URL</label>
+        <input type="text" id="apiBaseUrl" placeholder="https://api.deepseek.com/v1" />
+      </div>
+      <div class="field">
+        <label for="apiKey">API Key</label>
+        <input type="password" id="apiKey" autocomplete="off" />
+      </div>
+      <div class="field">
+        <label for="apiModel">模型</label>
+        <input type="text" id="apiModel" />
+      </div>
+      <div class="field">
+        <label class="checkbox-row"><input type="checkbox" id="useProxy" checked /> 使用本地代理</label>
+      </div>
+      <div class="field">
+        <label for="proxyUrl">代理地址</label>
+        <input type="text" id="proxyUrl" placeholder="http://127.0.0.1:8787" />
+      </div>
+      <div class="field">
+        <label class="checkbox-row"><input type="checkbox" id="useStream" checked /> 流式输出</label>
+      </div>
+      <div class="composer-row">
+        <button type="button" class="btn btn-primary" id="btnSaveSettings">保存</button>
+        <button type="button" class="btn" id="btnTestConn">测试连接</button>
+      </div>
+      <div id="testConnResult" class="test-result hidden"></div>
+    </div>
+  </div>
+
+  <script src="js/utils.js"></script>
+  <script src="js/excel.js"></script>
+  <script src="js/ai.js"></script>
+  <script src="js/history.js"></script>
+  <script src="js/dialog.js"></script>
+</body>
+</html>
