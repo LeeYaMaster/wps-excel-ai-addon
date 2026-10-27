@@ -1,5 +1,9 @@
 # WPS 表格「AI 助手」加载项
 
+仓库：
+- GitHub：[LeeYaMaster/wps-excel-ai-addon](https://github.com/LeeYaMaster/wps-excel-ai-addon)
+- Gitee：[leeyamaster/wps-excel-ai-addon](https://gitee.com/leeyamaster/wps-excel-ai-addon)（WPS Excel AI 插件）
+
 在 WPS 表格（et）中用**中文**提问，结合当前选区调用 **OpenAI 兼容** Chat Completions API。支持流式输出、多轮对话、快捷指令与本地历史。
 
 **产品路径（v1.2.3）：侧栏轻对话 →「AI 工作区」逐格同意写入。**  
